@@ -4,25 +4,23 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
+use App\Http\Traits\CanLoadRelations;
 use App\Models\Event;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
+    use CanLoadRelations;
+    private  $relations = ['user', 'attendees','attendees.user'];
     /**
      * Display a listing of the resource.
      */
     public function index()
     
     {
+        // $relations = ['user', 'attendees','attendees.user'];
+        $query = $this->loadRelations(Event::query());
 
-        $query = Event::query();
-
-        $relations = ['user', 'attendees','attendees.user'];
-
-        foreach($relations as $relation){
-            $query->when($this->shouldIncludeRelation($relation),fn($q)=> $q->with($relation));
-        }
 
         return EventResource::collection($query->latest()->paginate());
 
@@ -48,22 +46,9 @@ class EventController extends Controller
 
     $event = Event::create($validated);
 
-    return new EventResource($event);
+    return new EventResource($this->loadRelations($event));
     }
- protected function shouldIncludeRelation(string $relation)
-    {
 
-        $include = request()->query('include'); // Get the 'include' query parameter
-        if(!$include){
-            return false; // If no relation is specified, do not include it
-        }
-  
-        $relations = array_map('trim',explode(',', $include));
-        
-        // Split the relations by comma
-
-        return in_array($relation, $relations);
- }
     /**
      * Display the specified resource.
      */
@@ -71,7 +56,7 @@ class EventController extends Controller
     {
 
         $event->load('user','attendees'); // Eager load the user relationship
-        return new EventResource($event);
+        return new EventResource($this->loadRelations($event));
     }
   
 
@@ -89,7 +74,7 @@ class EventController extends Controller
 
     $event->update($validated);
 
-    return new EventResource($event);
+    return new EventResource($this->loadRelations($event));
 }
 
     /**
