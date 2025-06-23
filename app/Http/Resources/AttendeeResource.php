@@ -18,9 +18,9 @@ class AttendeeResource extends JsonResource
         // return parent::toArray($request);
 
         return [
-        //     'id' => $this->id,
-            // 'user_id' => $this->user_id
-           bcrypt('username')=> md5($this->user->name), // Assuming 'name' is a field in the User model
+            'id' => $this->id,
+            'user_id' => $this->user_id,
+           'name'=> $this->user->name, // Assuming 'name' is a field in the User model
         //     'event_id' => $this->event_id,
         //     'user' => new UserResource($this->whenLoaded('user')),
         //     'event' => new EventResource($this->whenLoaded('event')),

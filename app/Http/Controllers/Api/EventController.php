@@ -13,8 +13,20 @@ class EventController extends Controller
      * Display a listing of the resource.
      */
     public function index()
+    
     {
-        return EventResource::collection(Event::with('user','attendees')->get());
+
+        $query = Event::query();
+
+        $relations = ['user', 'attendees','attendees.user'];
+
+        foreach($relations as $relation){
+            $query->when($this->shouldIncludeRelation($relation),fn($q)=> $q->with($relation));
+        }
+
+        return EventResource::collection($query->latest()->paginate());
+
+
     }
 
     /**
@@ -38,7 +50,20 @@ class EventController extends Controller
 
     return new EventResource($event);
     }
- 
+ protected function shouldIncludeRelation(string $relation)
+    {
+
+        $include = request()->query('include'); // Get the 'include' query parameter
+        if(!$include){
+            return false; // If no relation is specified, do not include it
+        }
+  
+        $relations = array_map('trim',explode(',', $include));
+        
+        // Split the relations by comma
+
+        return in_array($relation, $relations);
+ }
     /**
      * Display the specified resource.
      */

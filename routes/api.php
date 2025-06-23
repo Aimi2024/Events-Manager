@@ -6,6 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BookController;
 
 route::apiResource('events',EventController::class);
-route::apiResource('events.attendees',AttendeeController::class)->scoped(['attendee'=>'event']);
+route::apiResource('events.attendees',AttendeeController::class)->scoped()->except('update');
 
 ?>
